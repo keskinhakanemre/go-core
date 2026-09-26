@@ -1,0 +1,12 @@
+# Production overlay, loaded when APP_ENV=prod.
+http:
+  drain_delay: 5s
+
+log:
+  level: info
+  format: json
+
+tracing:
+  enabled: true
+  endpoint: otel-collector.observability:4318
+  sample_ratio: 0.1

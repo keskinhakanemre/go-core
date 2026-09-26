@@ -1,0 +1,19 @@
+package product
+
+import (
+	"time"
+
+	"[[.Module]]/internal/domain"
+)
+
+// ProductResponse is the API representation of a product.
+type ProductResponse struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Price     int64     `json:"price"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func toResponse(p *domain.Product) *ProductResponse {
+	return &ProductResponse{ID: p.ID, Name: p.Name, Price: p.Price, CreatedAt: p.CreatedAt}
+}

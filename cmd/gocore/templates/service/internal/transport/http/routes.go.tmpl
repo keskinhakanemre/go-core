@@ -1,0 +1,28 @@
+// Package http maps routes to use case handlers. It is the only place that
+// knows about URLs, HTTP methods and success status codes.
+package http
+
+import (
+	"github.com/gofiber/fiber/v2"
+
+	"[[.CoreModule]]/httpserver"
+
+	"[[.Module]]/internal/app/product"
+)
+
+// Handlers lists every use case exposed over HTTP.
+type Handlers struct {
+	CreateProduct httpserver.Handler[product.CreateProductRequest, product.ProductResponse]
+	GetProduct    httpserver.Handler[product.GetProductRequest, product.ProductResponse]
+	ListProducts  httpserver.Handler[product.ListProductsRequest, product.ListProductsResponse]
+}
+
+// Register mounts all routes on r.
+func Register(r fiber.Router, h Handlers) {
+	v1 := r.Group("/api/v1")
+
+	products := v1.Group("/products")
+	products.Post("", httpserver.Handle(h.CreateProduct, httpserver.WithStatus(fiber.StatusCreated)))
+	products.Get("", httpserver.Handle(h.ListProducts))
+	products.Get("/:id", httpserver.Handle(h.GetProduct))
+}

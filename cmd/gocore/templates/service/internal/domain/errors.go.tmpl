@@ -1,0 +1,10 @@
+package domain
+
+import "[[.CoreModule]]/apperror"
+
+// Domain errors. The HTTP layer maps their kind to a status code
+// (NotFound -> 404, Conflict -> 409, ...). Compare with errors.Is.
+var (
+	ErrProductNotFound      = apperror.NotFound("product_not_found", "product not found")
+	ErrProductAlreadyExists = apperror.Conflict("product_already_exists", "product already exists")
+)

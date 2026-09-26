@@ -1,0 +1,12 @@
+// Package domain holds entities and domain errors. It must not import any
+// other package of this service, nor frameworks or database drivers.
+package domain
+
+import "time"
+
+type Product struct {
+	ID        string
+	Name      string
+	Price     int64 // minor units (cents) - never use floats for money
+	CreatedAt time.Time
+}

@@ -1,0 +1,41 @@
+package product
+
+import "context"
+
+const defaultLimit = 20
+
+type ListProductsRequest struct {
+	Limit  int `query:"limit" validate:"omitempty,min=1,max=100"`
+	Offset int `query:"offset" validate:"gte=0"`
+}
+
+type ListProductsResponse struct {
+	Items  []ProductResponse `json:"items"`
+	Total  int               `json:"total"`
+	Limit  int               `json:"limit"`
+	Offset int               `json:"offset"`
+}
+
+type ListProductsHandler struct {
+	repo Repository
+}
+
+func NewListProductsHandler(repo Repository) *ListProductsHandler {
+	return &ListProductsHandler{repo: repo}
+}
+
+func (h *ListProductsHandler) Handle(ctx context.Context, req *ListProductsRequest) (*ListProductsResponse, error) {
+	limit := req.Limit
+	if limit == 0 {
+		limit = defaultLimit
+	}
+	products, total, err := h.repo.List(ctx, limit, req.Offset)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]ProductResponse, 0, len(products))
+	for i := range products {
+		items = append(items, *toResponse(&products[i]))
+	}
+	return &ListProductsResponse{Items: items, Total: total, Limit: limit, Offset: req.Offset}, nil
+}

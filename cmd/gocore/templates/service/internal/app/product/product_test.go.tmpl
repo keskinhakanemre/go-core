@@ -1,0 +1,72 @@
+package product_test
+
+import (
+	"context"
+	"errors"
+	"testing"
+
+	"[[.Module]]/internal/app/product"
+	"[[.Module]]/internal/domain"
+	"[[.Module]]/internal/infra/memory"
+)
+
+// Use cases are plain Go: test them without HTTP, using the in-memory
+// repository or a hand written fake.
+
+func TestCreateAndGetProduct(t *testing.T) {
+	ctx := context.Background()
+	repo := memory.NewProductRepository()
+
+	created, err := product.NewCreateProductHandler(repo).Handle(ctx, &product.CreateProductRequest{Name: "pen", Price: 150})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if created.ID == "" || created.Name != "pen" || created.Price != 150 {
+		t.Fatalf("unexpected product: %+v", created)
+	}
+
+	got, err := product.NewGetProductHandler(repo).Handle(ctx, &product.GetProductRequest{ID: created.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.ID != created.ID {
+		t.Fatalf("got %s, want %s", got.ID, created.ID)
+	}
+}
+
+func TestGetProductNotFound(t *testing.T) {
+	_, err := product.NewGetProductHandler(memory.NewProductRepository()).
+		Handle(context.Background(), &product.GetProductRequest{ID: "missing"})
+	if !errors.Is(err, domain.ErrProductNotFound) {
+		t.Fatalf("expected ErrProductNotFound, got %v", err)
+	}
+}
+
+type failingRepo struct{ product.Repository }
+
+func (failingRepo) Create(context.Context, *domain.Product) error { return errors.New("db down") }
+
+func TestCreateProductPropagatesErrors(t *testing.T) {
+	_, err := product.NewCreateProductHandler(failingRepo{}).
+		Handle(context.Background(), &product.CreateProductRequest{Name: "pen"})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestListProductsDefaults(t *testing.T) {
+	ctx := context.Background()
+	repo := memory.NewProductRepository()
+	for _, name := range []string{"a1", "b2", "c3"} {
+		if _, err := product.NewCreateProductHandler(repo).Handle(ctx, &product.CreateProductRequest{Name: name}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	res, err := product.NewListProductsHandler(repo).Handle(ctx, &product.ListProductsRequest{Offset: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Total != 3 || len(res.Items) != 2 || res.Limit != 20 {
+		t.Fatalf("unexpected response: %+v", res)
+	}
+}

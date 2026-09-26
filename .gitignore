@@ -1,0 +1,10 @@
+bin/
+tmp/
+coverage.out
+*.test
+*.exe
+.env
+.idea/
+.vscode/
+go.work
+go.work.sum

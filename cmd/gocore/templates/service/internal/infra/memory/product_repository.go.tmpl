@@ -1,0 +1,64 @@
+// Package memory is an in-memory implementation of the repositories, useful
+// for local development and tests. Replace it with a real database adapter
+// (see [[.CoreModule]]/adapters/postgres) for production.
+package memory
+
+import (
+	"context"
+	"sort"
+	"sync"
+
+	"[[.Module]]/internal/domain"
+)
+
+type ProductRepository struct {
+	mu    sync.RWMutex
+	items map[string]domain.Product
+}
+
+func NewProductRepository() *ProductRepository {
+	return &ProductRepository{items: map[string]domain.Product{}}
+}
+
+func (r *ProductRepository) Create(_ context.Context, p *domain.Product) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, ok := r.items[p.ID]; ok {
+		return domain.ErrProductAlreadyExists
+	}
+	r.items[p.ID] = *p
+	return nil
+}
+
+func (r *ProductRepository) Get(_ context.Context, id string) (*domain.Product, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	p, ok := r.items[id]
+	if !ok {
+		return nil, domain.ErrProductNotFound
+	}
+	return &p, nil
+}
+
+func (r *ProductRepository) List(_ context.Context, limit, offset int) ([]domain.Product, int, error) {
+	r.mu.RLock()
+	all := make([]domain.Product, 0, len(r.items))
+	for _, p := range r.items {
+		all = append(all, p)
+	}
+	r.mu.RUnlock()
+
+	sort.Slice(all, func(i, j int) bool {
+		if all[i].CreatedAt.Equal(all[j].CreatedAt) {
+			return all[i].ID < all[j].ID
+		}
+		return all[i].CreatedAt.Before(all[j].CreatedAt)
+	})
+
+	total := len(all)
+	if offset >= total {
+		return []domain.Product{}, total, nil
+	}
+	end := min(offset+limit, total)
+	return all[offset:end], total, nil
+}

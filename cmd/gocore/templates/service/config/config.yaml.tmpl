@@ -1,0 +1,35 @@
+# Base configuration. Overlay: config.<APP_ENV>.yaml. Env override: APP_<SECTION>_<KEY>.
+# Never commit real secrets here - pass them via environment / Kubernetes Secrets.
+app:
+  name: [[.Name]]
+  env: local
+  version: dev
+
+http:
+  port: "8080"
+  read_timeout: 10s
+  write_timeout: 10s
+  idle_timeout: 60s
+  request_timeout: 5s
+  shutdown_timeout: 15s
+  drain_delay: 0s
+  body_limit: 4194304
+  access_log: true
+  cors_origins: []
+
+log:
+  level: debug
+  format: console
+
+tracing:
+  enabled: false
+  endpoint: localhost:4318
+  insecure: true
+  sample_ratio: 1.0
+
+metrics:
+  enabled: true
+  path: /metrics
+
+# postgres:
+#   dsn: ""   # APP_POSTGRES_DSN

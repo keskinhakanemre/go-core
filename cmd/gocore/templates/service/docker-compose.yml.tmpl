@@ -1,0 +1,56 @@
+# Local development environment.
+#   docker compose up -d --build
+# App:        http://localhost:8080/api/v1/products
+# Jaeger UI:  http://localhost:16686
+# Prometheus: http://localhost:9090
+# Grafana:    http://localhost:3000 (admin/admin)
+services:
+  app:
+    build: .
+    ports: ["8080:8080"]
+    environment:
+      APP_ENV: local
+      APP_LOG_FORMAT: json
+      APP_TRACING_ENABLED: "true"
+      APP_TRACING_ENDPOINT: jaeger:4318
+      # APP_POSTGRES_DSN: postgres://app:app@postgres:5432/app?sslmode=disable
+    depends_on: [jaeger]
+
+  # postgres:
+  #   image: postgres:17-alpine
+  #   environment: { POSTGRES_USER: app, POSTGRES_PASSWORD: app, POSTGRES_DB: app }
+  #   ports: ["5432:5432"]
+  #   volumes: [postgres_data:/var/lib/postgresql/data]
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on: [prometheus]
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  # postgres_data:

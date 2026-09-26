@@ -1,0 +1,18 @@
+// Package product contains the product use cases. It depends only on the
+// domain and on the interfaces declared in this file; infrastructure packages
+// implement them and cmd/api wires them together.
+package product
+
+import (
+	"context"
+
+	"[[.Module]]/internal/domain"
+)
+
+// Repository is the persistence port. Implementations translate driver
+// errors into domain errors (e.g. domain.ErrProductNotFound).
+type Repository interface {
+	Create(ctx context.Context, p *domain.Product) error
+	Get(ctx context.Context, id string) (*domain.Product, error)
+	List(ctx context.Context, limit, offset int) ([]domain.Product, int, error)
+}

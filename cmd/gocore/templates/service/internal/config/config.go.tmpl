@@ -1,0 +1,29 @@
+// Package config defines the service configuration.
+package config
+
+import (
+	coreconfig "[[.CoreModule]]/config"
+)
+
+// Config embeds the core BaseConfig (app, http, log, tracing, metrics) and
+// adds service specific sections. Every field can be overridden with an
+// APP_ prefixed environment variable, e.g. postgres.dsn -> APP_POSTGRES_DSN.
+type Config struct {
+	coreconfig.BaseConfig `mapstructure:",squash"`
+
+	// Example sections - uncomment when needed. Use coreconfig.Secret for
+	// credentials so they are masked if the config is ever logged.
+	//
+	// Postgres struct {
+	// 	DSN coreconfig.Secret `mapstructure:"dsn" validate:"required"`
+	// } `mapstructure:"postgres"`
+	//
+	// Downstream struct {
+	// 	InventoryURL string `mapstructure:"inventory_url" validate:"required,url"`
+	// } `mapstructure:"downstream"`
+}
+
+// Load reads config/config.yaml, config/config.<APP_ENV>.yaml and APP_* env vars.
+func Load() (*Config, error) {
+	return coreconfig.Load[Config](coreconfig.Options{EnvPrefix: "APP"})
+}

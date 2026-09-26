@@ -1,0 +1,51 @@
+package product
+
+import (
+	"context"
+	"time"
+
+	"github.com/google/uuid"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+
+	"[[.Module]]/internal/domain"
+)
+
+var tracer = otel.Tracer("[[.Module]]/internal/app/product")
+
+type CreateProductRequest struct {
+	Name  string `json:"name" validate:"required,min=2,max=120"`
+	Price int64  `json:"price" validate:"gte=0"`
+}
+
+type CreateProductHandler struct {
+	repo  Repository
+	now   func() time.Time
+	newID func() string
+}
+
+func NewCreateProductHandler(repo Repository) *CreateProductHandler {
+	return &CreateProductHandler{repo: repo, now: time.Now, newID: uuid.NewString}
+}
+
+func (h *CreateProductHandler) Handle(ctx context.Context, req *CreateProductRequest) (*ProductResponse, error) {
+	// Manual span example: HTTP and DB spans are created automatically.
+	ctx, span := tracer.Start(ctx, "CreateProduct")
+	defer span.End()
+
+	p := &domain.Product{
+		ID:        h.newID(),
+		Name:      req.Name,
+		Price:     req.Price,
+		CreatedAt: h.now().UTC(),
+	}
+	span.SetAttributes(attribute.String("product.id", p.ID))
+
+	if err := h.repo.Create(ctx, p); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "create product failed")
+		return nil, err
+	}
+	return toResponse(p), nil
+}

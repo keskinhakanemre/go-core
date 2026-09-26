@@ -1,0 +1,43 @@
+APP     := [[.Name]]
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+
+.PHONY: help tidy fmt vet lint test test-race cover build run docker-build up down
+
+help: ## List targets
+	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-14s %s\n", $$1, $$2}'
+
+tidy: ## go mod tidy
+	go mod tidy
+
+fmt: ## Format code
+	gofmt -s -w .
+
+vet: ## go vet
+	go vet ./...
+
+lint: ## golangci-lint
+	golangci-lint run ./...
+
+test: ## Unit tests
+	go test ./...
+
+test-race: ## Tests with race detector (needs cgo)
+	go test -race ./...
+
+cover: ## Coverage report
+	go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out
+
+build: ## Build binary into bin/
+	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=$(VERSION)" -o bin/$(APP) ./cmd/api
+
+run: ## Run locally
+	go run ./cmd/api
+
+docker-build: ## Build container image
+	docker build --build-arg VERSION=$(VERSION) -t $(APP):$(VERSION) .
+
+up: ## Start app + observability stack
+	docker compose up -d --build
+
+down: ## Stop the stack
+	docker compose down

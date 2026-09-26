@@ -1,0 +1,43 @@
+# [[.Name]]
+
+[[.CoreModule]] üzerine kurulmuş Go servisi.
+
+## Çalıştırma
+
+```bash
+make run                 # http://localhost:8080
+make up                  # uygulama + Jaeger + Prometheus + Grafana (docker compose)
+make test                # testler
+make lint                # golangci-lint
+```
+
+```bash
+curl -X POST localhost:8080/api/v1/products -H 'Content-Type: application/json' -d '{"name":"kalem","price":1500}'
+curl localhost:8080/api/v1/products
+```
+
+| Endpoint | Açıklama |
+|---|---|
+| `GET /livez` | Liveness (bağımlılık kontrolü yok) |
+| `GET /readyz` | Readiness (kayıtlı tüm health check'ler) |
+| `GET /metrics` | Prometheus metrikleri |
+
+## Konfigürasyon
+
+`config/config.yaml` → `config/config.<APP_ENV>.yaml` → `APP_*` env değişkenleri (en yüksek öncelik).
+Örnek: `http.port` → `APP_HTTP_PORT`, `tracing.enabled` → `APP_TRACING_ENABLED`.
+Secret'lar yaml'a yazılmaz; env veya Kubernetes Secret ile verilir.
+
+## Yapı
+
+```
+cmd/api/main.go             composition root (wiring)
+internal/config             servis config'i (core BaseConfig'i embed eder)
+internal/domain             entity'ler + domain hataları
+internal/app/<feature>      use case handler'ları + port (interface) tanımları
+internal/infra/<teknoloji>  port implementasyonları (DB, downstream client)
+internal/transport/http     route tanımları
+deploy/                     k8s, prometheus, grafana
+```
+
+Yeni endpoint eklerken `CLAUDE.md` içindeki kurallara ve checklist'e bak.

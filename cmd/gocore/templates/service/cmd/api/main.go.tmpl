@@ -1,0 +1,69 @@
+// Command api is the composition root: it builds every dependency and wires
+// them together. Business logic never lives here.
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+
+	"go.uber.org/zap"
+
+	"[[.CoreModule]]/service"
+
+	"[[.Module]]/internal/app/product"
+	"[[.Module]]/internal/config"
+	"[[.Module]]/internal/infra/memory"
+	transporthttp "[[.Module]]/internal/transport/http"
+)
+
+// version is set at build time: -ldflags "-X main.version=1.2.3".
+var version string
+
+func main() {
+	if err := run(context.Background()); err != nil {
+		if zap.L().Core().Enabled(zap.ErrorLevel) {
+			zap.L().Error("service exited with error", zap.Error(err))
+		} else {
+			// The logger is not initialised yet (e.g. invalid config).
+			fmt.Fprintln(os.Stderr, "fatal:", err)
+		}
+		os.Exit(1)
+	}
+}
+
+func run(ctx context.Context) error {
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	if version != "" {
+		cfg.App.Version = version
+	}
+
+	// Logger, tracing, HTTP server, /metrics, /livez, /readyz, graceful shutdown.
+	svc, err := service.New(ctx, cfg.BaseConfig)
+	if err != nil {
+		return err
+	}
+
+	// Infrastructure. Replace the in-memory repository with a real one, e.g.:
+	//
+	//	pool, err := postgres.Connect(ctx, postgres.Config{DSN: cfg.Postgres.DSN.Value()})
+	//	if err != nil { return err }
+	//	svc.Health.Add("postgres", pool)
+	//	svc.OnShutdown("postgres", postgres.Close(pool))
+	//
+	// (import "[[.CoreModule]]/adapters/postgres")
+	productRepo := memory.NewProductRepository()
+
+	// Use cases.
+	handlers := transporthttp.Handlers{
+		CreateProduct: product.NewCreateProductHandler(productRepo),
+		GetProduct:    product.NewGetProductHandler(productRepo),
+		ListProducts:  product.NewListProductsHandler(productRepo),
+	}
+
+	transporthttp.Register(svc.HTTP, handlers)
+	return svc.Run(ctx)
+}
