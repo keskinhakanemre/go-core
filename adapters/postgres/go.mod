@@ -2,6 +2,8 @@ module github.com/keskinhakanemre/go-core/adapters/postgres
 
 go 1.25.0
 
+toolchain go1.26.8
+
 require (
 	github.com/exaring/otelpgx v0.12.0
 	github.com/jackc/pgx/v5 v5.11.0

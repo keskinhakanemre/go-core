@@ -2,6 +2,8 @@ module github.com/keskinhakanemre/go-core
 
 go 1.26.0
 
+toolchain go1.26.8
+
 require (
 	github.com/go-playground/validator/v10 v10.30.5
 	github.com/gofiber/contrib/otelfiber/v2 v2.2.3

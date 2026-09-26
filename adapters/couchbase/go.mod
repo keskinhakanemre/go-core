@@ -2,6 +2,8 @@ module github.com/keskinhakanemre/go-core/adapters/couchbase
 
 go 1.25.0
 
+toolchain go1.26.8
+
 require (
 	github.com/couchbase/gocb-opentelemetry v0.3.0
 	github.com/couchbase/gocb/v2 v2.12.5
