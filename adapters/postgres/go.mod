@@ -1,4 +1,4 @@
-module github.com/hekanemre/go-core/adapters/postgres
+module github.com/keskinhakanemre/go-core/adapters/postgres
 
 go 1.25.0
 

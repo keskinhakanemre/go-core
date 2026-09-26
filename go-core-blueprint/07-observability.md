@@ -143,7 +143,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/hekanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/apperror"
 )
 
 var (

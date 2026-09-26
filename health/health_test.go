@@ -13,7 +13,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/hekanemre/go-core/health"
+	"github.com/keskinhakanemre/go-core/health"
 )
 
 func get(t *testing.T, app *fiber.App, path string) (int, health.Report, string) {

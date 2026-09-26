@@ -1,6 +1,6 @@
 # go-core
 
-`github.com/hekanemre/go-core` — servislerin import ettiği core framework. Tasarım gerekçeleri `go-core-blueprint/` altında.
+`github.com/keskinhakanemre/go-core` — servislerin import ettiği core framework. Tasarım gerekçeleri `go-core-blueprint/` altında.
 
 ## Komutlar
 - Test: `make test` (hızlı: `make test-short`) · Lint: `make lint` · Tidy: `make tidy`

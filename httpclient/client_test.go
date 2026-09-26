@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hekanemre/go-core/apperror"
-	"github.com/hekanemre/go-core/httpclient"
+	"github.com/keskinhakanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/httpclient"
 )
 
 func server(t *testing.T, handler http.HandlerFunc) (*httptest.Server, *atomic.Int32) {

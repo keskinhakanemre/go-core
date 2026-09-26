@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 
-	"github.com/hekanemre/go-core/logger"
+	"github.com/keskinhakanemre/go-core/logger"
 )
 
 func TestNewInstallsGlobal(t *testing.T) {

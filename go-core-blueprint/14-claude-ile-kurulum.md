@@ -13,7 +13,7 @@ O dizinde Claude Code'u açıp şu promptu ver:
 
 ```text
 docs/ klasöründeki blueprint dokümanlarını (README.md ve 01–13) baştan sona oku.
-Bu dokümanlara göre `github.com/hekanemre/go-core` adında bir Go modülü oluştur:
+Bu dokümanlara göre `github.com/keskinhakanemre/go-core` adında bir Go modülü oluştur:
 
 - 02-core-modul-yapisi.md'deki klasör yapısını kur (templates/ hariç).
 - config, logger, apperror, validation, httpserver, metrics, tracing,
@@ -38,7 +38,7 @@ templates/service/ altına örnek bir "product-service" iskeleti oluştur:
 cmd/api/main.go, internal/{config,domain,app/product,infra/couchbase,transport/http},
 config/config.yaml, Dockerfile, .dockerignore, docker-compose.yml, Makefile,
 deploy/{k8s,prometheus,grafana}, CLAUDE.md.
-go.mod'da core için `replace github.com/hekanemre/go-core => ../..` kullan
+go.mod'da core için `replace github.com/keskinhakanemre/go-core => ../..` kullan
 ve iskeletin derlendiğini doğrula.
 ```
 
@@ -46,7 +46,7 @@ ve iskeletin derlendiğini doğrula.
 
 ```text
 C:\dev\go-core\templates\service iskeletini kopyalayarak
-C:\dev\<yeni-servis> altında `github.com/hekanemre/<yeni-servis>` modülünü oluştur.
+C:\dev\<yeni-servis> altında `github.com/keskinhakanemre/<yeni-servis>` modülünü oluştur.
 Product örneğini kaldır, yerine <domain açıklaması> için şu endpoint'leri ekle: ...
 go-core'u `replace` ile ../go-core'dan kullan.
 ```
@@ -58,7 +58,7 @@ Her servis reposunun köküne koy; Claude Code her oturumda bunu okur ve core ku
 ```markdown
 # <servis-adi>
 
-Bu servis `github.com/hekanemre/go-core` üzerine kuruludur.
+Bu servis `github.com/keskinhakanemre/go-core` üzerine kuruludur.
 
 ## Komutlar
 - Çalıştır: `make run` (önce `docker compose up -d jaeger prometheus grafana <db>`)
@@ -93,6 +93,6 @@ go-core `docs/13-yeni-servis-rehberi.md` "B" ve "C" bölümlerini takip et.
 
 ## 5) Core'u güncel tutmak
 
-- Core'da değişiklik → test → `git tag vX.Y.Z` → servislerde `go get github.com/hekanemre/go-core@vX.Y.Z`.
+- Core'da değişiklik → test → `git tag vX.Y.Z` → servislerde `go get github.com/keskinhakanemre/go-core@vX.Y.Z`.
 - Breaking change'leri core `CHANGELOG.md`'ye yaz.
 - Bir servis içinde "bu her serviste lazım olur" dediğin kod çıktığında → core'a taşı.

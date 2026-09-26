@@ -1,7 +1,7 @@
 # go-core
 
-[![ci](https://github.com/hekanemre/go-core/actions/workflows/ci.yml/badge.svg)](https://github.com/hekanemre/go-core/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/hekanemre/go-core.svg)](https://pkg.go.dev/github.com/hekanemre/go-core)
+[![ci](https://github.com/keskinhakanemre/go-core/actions/workflows/ci.yml/badge.svg)](https://github.com/keskinhakanemre/go-core/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/keskinhakanemre/go-core.svg)](https://pkg.go.dev/github.com/keskinhakanemre/go-core)
 
 Go backend servisleri için tekrar kullanılabilir, production-ready core framework.
 Fiber tabanlı HTTP server, tipli hata yönetimi, validation, OpenTelemetry tracing, Prometheus metrikleri,
@@ -48,7 +48,7 @@ Gereksinim: **Go 1.26+**
 ### A) Yeni servis üret (önerilen)
 
 ```bash
-go run github.com/hekanemre/go-core/cmd/gocore@latest new github.com/<kullanici>/order-service
+go run github.com/keskinhakanemre/go-core/cmd/gocore@latest new github.com/<kullanici>/order-service
 cd order-service
 make run
 ```
@@ -69,7 +69,7 @@ CLI bayrakları: `-dir`, `-core-version v0.1.0`, `-core-replace ../go-core` (lok
 ### B) Mevcut bir projeye ekle
 
 ```bash
-go get github.com/hekanemre/go-core@latest
+go get github.com/keskinhakanemre/go-core@latest
 ```
 
 ```go
@@ -79,9 +79,9 @@ import (
 	"context"
 	"os"
 
-	"github.com/hekanemre/go-core/config"
-	"github.com/hekanemre/go-core/httpserver"
-	"github.com/hekanemre/go-core/service"
+	"github.com/keskinhakanemre/go-core/config"
+	"github.com/keskinhakanemre/go-core/httpserver"
+	"github.com/keskinhakanemre/go-core/service"
 )
 
 type Config struct {
@@ -282,20 +282,20 @@ Hatalar zincirin içinde render edildiği için metrik, access log ve span'ler *
 Semver, `v0.x` ile başlanır (breaking change → minor artar). Core ve adapter'lar ayrı etiketlenir:
 
 ```bash
-git tag v0.1.0                       # github.com/hekanemre/go-core
-git tag adapters/postgres/v0.1.0     # github.com/hekanemre/go-core/adapters/postgres
-git tag adapters/couchbase/v0.1.0    # github.com/hekanemre/go-core/adapters/couchbase
+git tag v0.1.0                       # github.com/keskinhakanemre/go-core
+git tag adapters/postgres/v0.1.0     # github.com/keskinhakanemre/go-core/adapters/postgres
+git tag adapters/couchbase/v0.1.0    # github.com/keskinhakanemre/go-core/adapters/couchbase
 git push origin --tags
 ```
 
-Servislerde: `go get github.com/hekanemre/go-core@v0.1.0`. Repo private ise:
+Servislerde: `go get github.com/keskinhakanemre/go-core@v0.1.0`. Repo private ise:
 
 ```bash
-go env -w GOPRIVATE=github.com/hekanemre/*
+go env -w GOPRIVATE=github.com/keskinhakanemre/*
 ```
 
 Core'u bir servisle aynı anda geliştirirken servisin `go.mod`'una
-`replace github.com/hekanemre/go-core => ../go-core` ekle ya da `go work init ./go-core ./order-service` kullan.
+`replace github.com/keskinhakanemre/go-core => ../go-core` ekle ya da `go work init ./go-core ./order-service` kullan.
 Değişiklikler [CHANGELOG.md](CHANGELOG.md)'ye yazılır.
 
 ## Geliştirme

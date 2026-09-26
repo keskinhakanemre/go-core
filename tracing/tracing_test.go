@@ -7,7 +7,7 @@ import (
 	"go.opentelemetry.io/otel"
 	semconv "go.opentelemetry.io/otel/semconv/v1.43.0"
 
-	"github.com/hekanemre/go-core/tracing"
+	"github.com/keskinhakanemre/go-core/tracing"
 )
 
 func TestInitDisabledInstallsPropagator(t *testing.T) {

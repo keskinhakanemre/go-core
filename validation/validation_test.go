@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/hekanemre/go-core/apperror"
-	"github.com/hekanemre/go-core/validation"
+	"github.com/keskinhakanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/validation"
 )
 
 type item struct {

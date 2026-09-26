@@ -53,6 +53,6 @@ Amaç: Bu klasörü başka bir dizine kopyalayıp, buradaki dokümanlara bakarak
 
 Dokümanlarda şu yer tutucular kullanılıyor, kendi değerlerinle değiştir:
 
-- `github.com/hekanemre/go-core` → core modülünün import yolu
-- `github.com/hekanemre/<servis-adi>` → servis modülünün import yolu
+- `github.com/keskinhakanemre/go-core` → core modülünün import yolu
+- `github.com/keskinhakanemre/<servis-adi>` → servis modülünün import yolu
 - `<servis-adi>` → servis adı (ör. `product-service`)

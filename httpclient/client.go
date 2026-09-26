@@ -24,8 +24,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 
-	"github.com/hekanemre/go-core/apperror"
-	"github.com/hekanemre/go-core/logger"
+	"github.com/keskinhakanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/logger"
 )
 
 // HeaderIdempotencyKey marks non-idempotent requests (POST, PATCH) as safe to retry.

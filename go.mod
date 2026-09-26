@@ -1,4 +1,4 @@
-module github.com/hekanemre/go-core
+module github.com/keskinhakanemre/go-core
 
 go 1.26.0
 

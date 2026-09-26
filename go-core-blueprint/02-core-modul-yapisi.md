@@ -21,7 +21,7 @@ Core kodu her servise kopyalanır.
 
 ```
 go-core/
-├── go.mod                        # module github.com/hekanemre/go-core
+├── go.mod                        # module github.com/keskinhakanemre/go-core
 ├── README.md
 ├── Makefile
 ├── .golangci.yml
@@ -59,7 +59,7 @@ go-core/
 ## go.mod (başlangıç)
 
 ```go
-module github.com/hekanemre/go-core
+module github.com/keskinhakanemre/go-core
 
 go 1.23
 
@@ -87,8 +87,8 @@ Versiyonlar kaynak projeden alındı. Yeni kurulumda `go get -u ./... && go mod 
 Core henüz push edilmemişken servisin `go.mod`'una:
 
 ```go
-require github.com/hekanemre/go-core v0.0.0
-replace github.com/hekanemre/go-core => ../go-core
+require github.com/keskinhakanemre/go-core v0.0.0
+replace github.com/keskinhakanemre/go-core => ../go-core
 ```
 
 Ya da birden fazla modül üzerinde aynı anda çalışırken `go work`:
@@ -100,7 +100,7 @@ go work init ./go-core ./product-service
 Yayınlamak için: `git tag v0.1.0 && git push --tags`. Private repo ise:
 
 ```bash
-go env -w GOPRIVATE=github.com/hekanemre/*
+go env -w GOPRIVATE=github.com/keskinhakanemre/*
 ```
 
 ## Kalite araçları (core ve servislerde ortak)

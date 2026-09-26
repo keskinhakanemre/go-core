@@ -1,4 +1,4 @@
-module github.com/hekanemre/go-core/adapters/couchbase
+module github.com/keskinhakanemre/go-core/adapters/couchbase
 
 go 1.25.0
 

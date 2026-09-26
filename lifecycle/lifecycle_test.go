@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hekanemre/go-core/lifecycle"
+	"github.com/keskinhakanemre/go-core/lifecycle"
 )
 
 func TestRunStopsOnContextAndRunsHooksInReverse(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
-	"github.com/hekanemre/go-core/apperror"
-	"github.com/hekanemre/go-core/logger"
+	"github.com/keskinhakanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/logger"
 )
 
 // ErrorBody is the error object of every error response:

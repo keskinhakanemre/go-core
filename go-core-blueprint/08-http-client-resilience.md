@@ -43,7 +43,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 
-	"github.com/hekanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/apperror"
 )
 
 type Config struct {

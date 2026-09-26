@@ -20,8 +20,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
-	"github.com/hekanemre/go-core/config"
-	"github.com/hekanemre/go-core/metrics"
+	"github.com/keskinhakanemre/go-core/config"
+	"github.com/keskinhakanemre/go-core/metrics"
 )
 
 const localsRequestTimeout = "gocore.request_timeout"

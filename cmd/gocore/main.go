@@ -1,6 +1,6 @@
 // Command gocore scaffolds new services built on go-core.
 //
-//	go run github.com/hekanemre/go-core/cmd/gocore@latest new github.com/acme/order-service
+//	go run github.com/keskinhakanemre/go-core/cmd/gocore@latest new github.com/acme/order-service
 //
 // Flags (after the module path):
 //
@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	coreModule = "github.com/hekanemre/go-core"
+	coreModule = "github.com/keskinhakanemre/go-core"
 	goVersion  = "1.26"
 	tmplRoot   = "templates/service"
 )

@@ -48,8 +48,8 @@
 
 ```bash
 mkdir product-service && cd product-service
-go mod init github.com/hekanemre/product-service
-go get github.com/hekanemre/go-core@latest
+go mod init github.com/keskinhakanemre/product-service
+go get github.com/keskinhakanemre/go-core@latest
 # core lokaldeyse: go.mod'a replace ekle (bkz. 02)
 ```
 

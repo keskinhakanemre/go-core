@@ -153,7 +153,7 @@ func Load[T any](opts Options) (*T, error) {
 // internal/config/config.go
 package config
 
-import coreconfig "github.com/hekanemre/go-core/config"
+import coreconfig "github.com/keskinhakanemre/go-core/config"
 
 type Config struct {
 	coreconfig.BaseConfig `mapstructure:",squash"`

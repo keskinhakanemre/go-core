@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hekanemre/go-core/config"
+	"github.com/keskinhakanemre/go-core/config"
 )
 
 type serviceConfig struct {

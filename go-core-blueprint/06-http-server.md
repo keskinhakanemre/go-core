@@ -38,7 +38,7 @@ import (
 	"sync"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/hekanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/apperror"
 )
 
 var (
@@ -87,8 +87,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/hekanemre/go-core/apperror"
-	"github.com/hekanemre/go-core/validation"
+	"github.com/keskinhakanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/validation"
 )
 
 // Handler HTTP'den bağımsız use-case sözleşmesi.
@@ -182,8 +182,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
-	"github.com/hekanemre/go-core/apperror"
-	"github.com/hekanemre/go-core/logger"
+	"github.com/keskinhakanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/logger"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -245,8 +245,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 
-	"github.com/hekanemre/go-core/config"
-	"github.com/hekanemre/go-core/metrics"
+	"github.com/keskinhakanemre/go-core/config"
+	"github.com/keskinhakanemre/go-core/metrics"
 )
 
 const localsRequestTimeout = "core.request_timeout"

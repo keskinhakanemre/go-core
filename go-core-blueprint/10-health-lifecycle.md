@@ -186,19 +186,19 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/hekanemre/go-core/health"
-	"github.com/hekanemre/go-core/httpclient"
-	"github.com/hekanemre/go-core/httpserver"
-	"github.com/hekanemre/go-core/lifecycle"
-	"github.com/hekanemre/go-core/logger"
-	"github.com/hekanemre/go-core/tracing"
-	cbadapter "github.com/hekanemre/go-core/adapters/couchbase"
+	"github.com/keskinhakanemre/go-core/health"
+	"github.com/keskinhakanemre/go-core/httpclient"
+	"github.com/keskinhakanemre/go-core/httpserver"
+	"github.com/keskinhakanemre/go-core/lifecycle"
+	"github.com/keskinhakanemre/go-core/logger"
+	"github.com/keskinhakanemre/go-core/tracing"
+	cbadapter "github.com/keskinhakanemre/go-core/adapters/couchbase"
 
-	"github.com/hekanemre/product-service/internal/app/product"
-	"github.com/hekanemre/product-service/internal/config"
-	cbrepo "github.com/hekanemre/product-service/internal/infra/couchbase"
-	"github.com/hekanemre/product-service/internal/infra/inventory"
-	transporthttp "github.com/hekanemre/product-service/internal/transport/http"
+	"github.com/keskinhakanemre/product-service/internal/app/product"
+	"github.com/keskinhakanemre/product-service/internal/config"
+	cbrepo "github.com/keskinhakanemre/product-service/internal/infra/couchbase"
+	"github.com/keskinhakanemre/product-service/internal/infra/inventory"
+	transporthttp "github.com/keskinhakanemre/product-service/internal/transport/http"
 )
 
 func main() {

@@ -13,10 +13,10 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/hekanemre/go-core/apperror"
-	"github.com/hekanemre/go-core/config"
-	"github.com/hekanemre/go-core/httpserver"
-	"github.com/hekanemre/go-core/validation"
+	"github.com/keskinhakanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/config"
+	"github.com/keskinhakanemre/go-core/httpserver"
+	"github.com/keskinhakanemre/go-core/validation"
 )
 
 var errItemNotFound = apperror.NotFound("item_not_found", "item not found")

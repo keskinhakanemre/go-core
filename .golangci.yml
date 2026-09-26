@@ -33,4 +33,4 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/hekanemre/go-core
+        - github.com/keskinhakanemre/go-core

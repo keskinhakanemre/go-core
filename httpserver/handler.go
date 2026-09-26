@@ -8,8 +8,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/hekanemre/go-core/apperror"
-	"github.com/hekanemre/go-core/validation"
+	"github.com/keskinhakanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/validation"
 )
 
 // Handler is a transport independent use case. Implementations must not

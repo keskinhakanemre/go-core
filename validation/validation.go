@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
-	"github.com/hekanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/apperror"
 )
 
 var (

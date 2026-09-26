@@ -25,12 +25,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
-	"github.com/hekanemre/go-core/config"
-	"github.com/hekanemre/go-core/health"
-	"github.com/hekanemre/go-core/httpserver"
-	"github.com/hekanemre/go-core/lifecycle"
-	"github.com/hekanemre/go-core/logger"
-	"github.com/hekanemre/go-core/tracing"
+	"github.com/keskinhakanemre/go-core/config"
+	"github.com/keskinhakanemre/go-core/health"
+	"github.com/keskinhakanemre/go-core/httpserver"
+	"github.com/keskinhakanemre/go-core/lifecycle"
+	"github.com/keskinhakanemre/go-core/logger"
+	"github.com/keskinhakanemre/go-core/tracing"
 )
 
 type Service struct {

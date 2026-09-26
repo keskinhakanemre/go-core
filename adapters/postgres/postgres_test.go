@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
-	"github.com/hekanemre/go-core/adapters/postgres"
+	"github.com/keskinhakanemre/go-core/adapters/postgres"
 )
 
 func TestConnectInvalidDSNDoesNotLeakPassword(t *testing.T) {

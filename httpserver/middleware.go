@@ -7,8 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
-	"github.com/hekanemre/go-core/logger"
-	"github.com/hekanemre/go-core/metrics"
+	"github.com/keskinhakanemre/go-core/logger"
+	"github.com/keskinhakanemre/go-core/metrics"
 )
 
 // RequestID returns the request id of the current request.

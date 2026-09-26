@@ -130,7 +130,7 @@ func HTTPStatus(k Kind) int {
 // internal/domain/errors.go
 package domain
 
-import "github.com/hekanemre/go-core/apperror"
+import "github.com/keskinhakanemre/go-core/apperror"
 
 var (
 	ErrProductNotFound      = apperror.NotFound("product_not_found", "product not found")

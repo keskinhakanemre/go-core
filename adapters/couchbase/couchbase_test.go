@@ -7,7 +7,7 @@ import (
 
 	"github.com/couchbase/gocb/v2"
 
-	"github.com/hekanemre/go-core/adapters/couchbase"
+	"github.com/keskinhakanemre/go-core/adapters/couchbase"
 )
 
 func TestConnectRequiresBucket(t *testing.T) {

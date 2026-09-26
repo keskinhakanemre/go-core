@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/hekanemre/go-core/apperror"
+	"github.com/keskinhakanemre/go-core/apperror"
 )
 
 var errNotFound = apperror.NotFound("thing_not_found", "thing not found")
