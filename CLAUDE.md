@@ -9,7 +9,7 @@
 ## Kurallar
 - Bu bir kütüphane: public API değişikliği = breaking change. `CHANGELOG.md`'ye yaz, gerekiyorsa minor sürümü artır.
 - Paketler birbirini minimum import eder. `config` ve `apperror` hiçbir core paketini import etmez;
-  `httpserver` → `apperror`, `validation`, `metrics`, `logger`, `config`; `service` hepsini bağlar.
+  `httpserver` → `apperror`, `validation`, `metrics`, `logger`, `config`, `openapi`; `openapi` hiçbir core paketini import etmez; `service` hepsini bağlar.
 - Adapter modülleri core'u import etmez; ağır bağımlılıklar (DB driver'ları) sadece adapter modüllerinde olur.
 - Yeni davranış = test. HTTP davranışı `app.Test` ile, kapanış/ağ davranışı gerçek listener ile test edilir.
 - Hatalar ya loglanır ya döndürülür; loglama merkezi `httpserver.ErrorHandler`'da.

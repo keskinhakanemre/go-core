@@ -29,6 +29,23 @@ type handleOptions struct {
 	status     int
 	timeout    time.Duration
 	noValidate bool
+
+	// Documentation only; used when the route is registered through an API.
+	summary     string
+	description string
+	tags        []string
+	errors      []int
+	operationID string
+	deprecated  bool
+	hidden      bool
+}
+
+func newHandleOptions(opts []HandleOption) handleOptions {
+	o := handleOptions{status: http.StatusOK}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	return o
 }
 
 // HandleOption customises a single route.
@@ -54,10 +71,7 @@ var ErrTimeout = apperror.Timeout("timeout", "request timed out")
 // then validated with `validate` tags. A nil response (or 204 status) sends
 // an empty body.
 func Handle[Req any, Res any](h Handler[Req, Res], opts ...HandleOption) fiber.Handler {
-	o := handleOptions{status: http.StatusOK}
-	for _, opt := range opts {
-		opt(&o)
-	}
+	o := newHandleOptions(opts)
 
 	return func(c *fiber.Ctx) error {
 		var req Req

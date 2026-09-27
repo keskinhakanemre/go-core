@@ -1,5 +1,8 @@
 // Package http maps routes to use case handlers. It is the only place that
 // knows about URLs, HTTP methods and success status codes.
+//
+// Routes registered through httpserver.Get/Post/... are documented
+// automatically in the OpenAPI document (/openapi.json) and Swagger UI (/docs).
 package http
 
 import (
@@ -17,12 +20,20 @@ type Handlers struct {
 	ListProducts  httpserver.Handler[product.ListProductsRequest, product.ListProductsResponse]
 }
 
-// Register mounts all routes on r.
-func Register(r fiber.Router, h Handlers) {
-	v1 := r.Group("/api/v1")
+// Register mounts all routes on api.
+func Register(api *httpserver.API, h Handlers) {
+	api.DescribeTag("Products", "Product catalogue")
 
-	products := v1.Group("/products")
-	products.Post("", httpserver.Handle(h.CreateProduct, httpserver.WithStatus(fiber.StatusCreated)))
-	products.Get("", httpserver.Handle(h.ListProducts))
-	products.Get("/:id", httpserver.Handle(h.GetProduct))
+	products := api.Group("/api/v1/products", "Products")
+	httpserver.Post(products, "", h.CreateProduct,
+		httpserver.WithStatus(fiber.StatusCreated),
+		httpserver.WithSummary("Create a product"),
+		httpserver.WithOperationID("CreateProduct"))
+	httpserver.Get(products, "", h.ListProducts,
+		httpserver.WithSummary("List products"),
+		httpserver.WithOperationID("ListProducts"))
+	httpserver.Get(products, "/:id", h.GetProduct,
+		httpserver.WithSummary("Get a product"),
+		httpserver.WithOperationID("GetProduct"),
+		httpserver.WithErrors(fiber.StatusNotFound))
 }

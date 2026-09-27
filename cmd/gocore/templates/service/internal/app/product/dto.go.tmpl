@@ -8,9 +8,9 @@ import (
 
 // ProductResponse is the API representation of a product.
 type ProductResponse struct {
-	ID        string    `json:"id"`
+	ID        string    `json:"id" example:"0b8a4b6e-0f3e-4a8b-9a55-6b3c8e1f0a11"`
 	Name      string    `json:"name"`
-	Price     int64     `json:"price"`
+	Price     int64     `json:"price" doc:"Price in minor units (cents)"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

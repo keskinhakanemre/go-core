@@ -37,6 +37,7 @@ type BaseConfig struct {
 	Log     LogConfig     `mapstructure:"log"`
 	Tracing TracingConfig `mapstructure:"tracing"`
 	Metrics MetricsConfig `mapstructure:"metrics"`
+	Docs    DocsConfig    `mapstructure:"docs"`
 }
 
 type AppConfig struct {
@@ -82,6 +83,14 @@ type MetricsConfig struct {
 	Path    string `mapstructure:"path"`
 }
 
+// DocsConfig controls the OpenAPI document and Swagger UI endpoints.
+// Disabled by default; enable it for local and staging environments.
+type DocsConfig struct {
+	Enabled  bool   `mapstructure:"enabled"`
+	Path     string `mapstructure:"path" validate:"omitempty,startswith=/"`      // Swagger UI
+	SpecPath string `mapstructure:"spec_path" validate:"omitempty,startswith=/"` // OpenAPI JSON
+}
+
 // Validator can be implemented by config structs for cross field validation.
 type Validator interface {
 	Validate() error
@@ -113,6 +122,9 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("tracing.sample_ratio", 1.0)
 	v.SetDefault("metrics.enabled", true)
 	v.SetDefault("metrics.path", "/metrics")
+	v.SetDefault("docs.enabled", false)
+	v.SetDefault("docs.path", "/docs")
+	v.SetDefault("docs.spec_path", "/openapi.json")
 }
 
 // Load reads configuration files and environment variables into a new T.

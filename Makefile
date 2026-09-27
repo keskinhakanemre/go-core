@@ -1,5 +1,5 @@
 MODULES := . adapters/postgres adapters/couchbase
-LINT    := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+LINT    := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 
 .PHONY: help tidy fmt vet lint test test-short test-race cover vuln scaffold-demo
 

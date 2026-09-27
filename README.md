@@ -26,13 +26,14 @@ Tasarım gerekçeleri ve kaynak projenin analizi: [`go-core-blueprint/`](go-core
 |---|---|
 | [`service`](service) | Hepsini bağlayan bootstrap: logger + tracing + HTTP server + health + graceful shutdown |
 | [`config`](config) | Generic `Load[T]`: YAML + ortam overlay'i + env override + validation, `Secret` tipi |
-| [`httpserver`](httpserver) | Fiber app, middleware zinciri, generic `Handle[Req, Res]`, merkezi hata render'ı |
+| [`httpserver`](httpserver) | Fiber app, middleware zinciri, generic `Handle[Req, Res]`, merkezi hata render'ı; `API` ile otomatik Swagger dokümanı |
 | [`apperror`](apperror) | Transport'tan bağımsız tipli hatalar (`NotFound`, `Conflict`, ...) → HTTP status |
 | [`validation`](validation) | `go-playground/validator` sarmalayıcı, client dostu alan isimleri |
 | [`logger`](logger) | Zap logger, `FromContext(ctx)` ile trace_id / request_id'li log |
 | [`tracing`](tracing) | OpenTelemetry TracerProvider (OTLP/HTTP), W3C propagation, sampling |
 | [`metrics`](metrics) | Prometheus HTTP RED metrikleri + `/metrics` |
 | [`httpclient`](httpclient) | Downstream client: circuit breaker + retry + timeout + tracing + metrik |
+| [`openapi`](openapi) | Go tiplerinden OpenAPI 3 dokümanı üretimi (`httpserver.API` kullanır) |
 | [`health`](health) | `/livez` ve `/readyz`, paralel ve timeout'lu `Checker`'lar |
 | [`lifecycle`](lifecycle) | Sinyal yakalama + ters sırada, tek zaman bütçeli kapatma |
 | [`adapters/postgres`](adapters/postgres) | *Ayrı modül.* pgx pool + otelpgx + `WithTx` + hata yardımcıları |
@@ -152,6 +153,38 @@ products.Post("/import", httpserver.Handle(importHandler, httpserver.WithTimeout
 `validate` tag'lerini çalıştırır, request timeout'lu context ile `Handle`'ı çağırır, sonucu JSON döner.
 Handler'lar Fiber import etmez, düz Go fonksiyonu gibi test edilir.
 
+### API dokümantasyonu (OpenAPI + Swagger UI)
+
+Route'ları `svc.API` üzerinden kaydedersen her endpoint otomatik olarak dokümante edilir; ayrıca yorum satırı yazmaya gerek yoktur.
+
+```go
+products := svc.API.Group("/api/v1/products", "Products")
+httpserver.Post(products, "", createHandler,
+	httpserver.WithStatus(fiber.StatusCreated),
+	httpserver.WithSummary("Create a product"))
+httpserver.Get(products, "/:id", getHandler, httpserver.WithErrors(fiber.StatusNotFound))
+```
+
+`docs.enabled: true` iken:
+
+- `GET /docs`: Swagger UI; endpoint'leri tarayıcıdan "Try it out" ile dene.
+- `GET /openapi.json`: OpenAPI 3.0 dokümanı; Postman'e import et ya da mobil/web app için client kodu üret.
+
+Doküman request/response struct'larından üretilir:
+
+| Kaynak | Dokümandaki karşılığı |
+|---|---|
+| `params:"id"` / `query:"limit"` / `reqHeader:"X-Tenant"` | path / query / header parametresi |
+| `json:"name"` | request body alanı |
+| `validate:"required,min=2,max=120,email,oneof=a b,uuid4"` | zorunlu alan, uzunluk/sayı sınırları, format, enum |
+| `doc:"..."` / `example:"..."` | açıklama / örnek değer |
+| Response tipi, `WithStatus` | başarı yanıtı ve şeması |
+| Otomatik | 400 (geçersiz istek), 422 (validation), 500 ve standart hata gövdesi; `WithErrors(404, 409)` ile ekler |
+
+Diğer seçenekler: `WithDescription`, `WithTags`, `WithOperationID`, `WithDeprecated`, `WithoutDocs`.
+Fonksiyonlar için `httpserver.Func(fn)`. Doğrudan `svc.HTTP`'ye eklenen route'lar çalışır ama dokümana girmez.
+Prod'da `docs.enabled: false` tut; Swagger UI dosyaları tarayıcı tarafından jsDelivr CDN'den yüklenir.
+
 ### Hatalar
 
 ```go
@@ -248,6 +281,8 @@ Env adları `EnvPrefix: "APP"` içindir.
 | `tracing.insecure` | | `true` | TLS'siz OTLP |
 | `tracing.sample_ratio` | | `1.0` | Kök span örnekleme oranı (parent-based) |
 | `metrics.enabled` / `metrics.path` | | `true` / `/metrics` | Prometheus endpoint'i |
+| `docs.enabled` | `APP_DOCS_ENABLED` | `false` | Swagger UI + OpenAPI endpoint'leri (local/staging'de aç) |
+| `docs.path` / `docs.spec_path` | | `/docs` / `/openapi.json` | Doküman adresleri |
 
 > `APP_ENV` hem ortam seçici hem `app.env` değeridir. `EnvPrefix` boş bırakılırsa anahtarlar prefix'siz okunur (`HTTP_PORT`).
 
@@ -272,7 +307,7 @@ Hatalar zincirin içinde render edildiği için metrik, access log ve span'ler *
 
 5xx'lerde mesaj her zaman `internal server error`'dır; gerçek sebep `trace_id` / `request_id` ile loglanır.
 
-**Operasyonel endpoint'ler** (trace, metrik ve access log dışı): `/livez`, `/readyz`, `/metrics`.
+**Operasyonel endpoint'ler** (trace, metrik ve access log dışı): `/livez`, `/readyz`, `/metrics`, `/docs`, `/openapi.json`.
 
 **Metrikler:** `http_request_duration_seconds{route,method,status}` (route şablonu, ham path değil),
 `http_requests_in_flight`, Go runtime ve process metrikleri.

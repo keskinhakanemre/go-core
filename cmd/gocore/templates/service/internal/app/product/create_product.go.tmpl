@@ -15,8 +15,8 @@ import (
 var tracer = otel.Tracer("[[.Module]]/internal/app/product")
 
 type CreateProductRequest struct {
-	Name  string `json:"name" validate:"required,min=2,max=120"`
-	Price int64  `json:"price" validate:"gte=0"`
+	Name  string `json:"name" validate:"required,min=2,max=120" example:"Kalem"`
+	Price int64  `json:"price" validate:"gte=0" doc:"Price in minor units (cents)" example:"1500"`
 }
 
 type CreateProductHandler struct {
