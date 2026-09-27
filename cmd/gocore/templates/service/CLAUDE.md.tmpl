@@ -11,7 +11,9 @@ Bu servis `[[.CoreModule]]` üzerine kuruludur. Core'daki paketleri tekrar yazma
 - `internal/app` paketleri `fiber`, `pgx`, `gocb`, `net/http` import ETMEZ. Dış bağımlılıklar `ports.go`'daki interface'lerle alınır.
 - `internal/domain` hiçbir iç pakete bağımlı değildir.
 - Her endpoint: `XxxRequest` + response tipi + `XxxHandler` + `Handle(ctx, *Req) (*Res, error)`.
-  Route kaydı `internal/transport/http/routes.go`'da `httpserver.Handle(...)` ile yapılır.
+  Route kaydı `internal/transport/http/routes.go`'da `httpserver.Get/Post/Put/Patch/Delete(api, ...)` ile yapılır;
+  böylece endpoint otomatik olarak `/docs` (Swagger UI) ve `/openapi.json`'a girer. `svc.HTTP`'ye doğrudan route ekleme (dokümana girmez).
+- Dokümantasyon: alanlara `doc:"..."` ve `example:"..."` tag'leri, route'a `WithSummary`, dönebileceği hatalar için `WithErrors(404, 409)`.
 - Request tag'leri: body `json`, path `params`, query `query`, header `reqHeader`; doğrulama `validate`.
 - Başarı status'u route'ta: POST → `httpserver.WithStatus(fiber.StatusCreated)`, DELETE → `StatusNoContent`.
 
@@ -36,5 +38,5 @@ Bu servis `[[.CoreModule]]` üzerine kuruludur. Core'daki paketleri tekrar yazma
 - [ ] Handler sadece interface'lere bağımlı, `fiber` import etmiyor
 - [ ] Gerekirse port'a metot eklendi ve tüm implementasyonlar güncellendi
 - [ ] Hatalar domain hatası ya da `%w` ile sarılmış
-- [ ] Route `routes.go`'ya, handler `Handlers` struct'ına ve `main.go`'daki wiring'e eklendi
+- [ ] Route `routes.go`'ya `httpserver.Get/Post/...` ile (summary + `WithErrors` dahil), handler `Handlers` struct'ına ve `main.go`'daki wiring'e eklendi
 - [ ] Unit test (fake/in-memory repo) + route testi (`app.Test`)

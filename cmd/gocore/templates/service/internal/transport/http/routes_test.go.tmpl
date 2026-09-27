@@ -21,7 +21,8 @@ import (
 func newApp() *fiber.App {
 	repo := memory.NewProductRepository()
 	app := httpserver.New(coreconfig.HTTPConfig{})
-	transporthttp.Register(app, transporthttp.Handlers{
+	api := httpserver.NewAPI(app, httpserver.APIInfo{Title: "test", Version: "test"})
+	transporthttp.Register(api, transporthttp.Handlers{
 		CreateProduct: product.NewCreateProductHandler(repo),
 		GetProduct:    product.NewGetProductHandler(repo),
 		ListProducts:  product.NewListProductsHandler(repo),
@@ -81,6 +82,32 @@ func TestProductRouteErrors(t *testing.T) {
 		status, body := call(t, app, tc.method, tc.path, tc.body)
 		if status != tc.status || !strings.Contains(body, `"code":"`+tc.code+`"`) {
 			t.Errorf("%s %s: got %d %s, want %d %s", tc.method, tc.path, status, body, tc.status, tc.code)
+		}
+	}
+}
+
+// The OpenAPI document is generated from the request/response structs; this
+// guards against routes silently disappearing from /docs.
+func TestRoutesAreDocumented(t *testing.T) {
+	repo := memory.NewProductRepository()
+	api := httpserver.NewAPI(httpserver.New(coreconfig.HTTPConfig{}), httpserver.APIInfo{Title: "test", Version: "test"})
+	transporthttp.Register(api, transporthttp.Handlers{
+		CreateProduct: product.NewCreateProductHandler(repo),
+		GetProduct:    product.NewGetProductHandler(repo),
+		ListProducts:  product.NewListProductsHandler(repo),
+	})
+	doc, err := api.Spec().Document()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for path, methods := range map[string][]string{
+		"/api/v1/products":      {"get", "post"},
+		"/api/v1/products/{id}": {"get"},
+	} {
+		for _, m := range methods {
+			if doc.Paths[path][m] == nil {
+				t.Errorf("%s %s is not documented", m, path)
+			}
 		}
 	}
 }

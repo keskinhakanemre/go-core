@@ -64,6 +64,7 @@ func run(ctx context.Context) error {
 		ListProducts:  product.NewListProductsHandler(productRepo),
 	}
 
-	transporthttp.Register(svc.HTTP, handlers)
+	// Routes registered on svc.API are served and documented at /docs (when docs.enabled).
+	transporthttp.Register(svc.API, handlers)
 	return svc.Run(ctx)
 }

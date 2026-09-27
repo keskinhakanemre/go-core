@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"slices"
 	"strings"
 	"sync"
@@ -128,5 +129,36 @@ func TestRunFailsOnBusyPort(t *testing.T) {
 	}
 	if err := svc.Run(context.Background()); err == nil || errors.Is(err, context.Canceled) {
 		t.Fatalf("expected listen error, got %v", err)
+	}
+}
+
+func TestDocsEndpoints(t *testing.T) {
+	for _, enabled := range []bool{true, false} {
+		cfg := baseConfig(t)
+		cfg.Docs.Enabled = enabled
+		svc, err := service.New(context.Background(), cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		httpserver.Get(svc.API, "/ping", httpserver.Func(func(context.Context, *struct{}) (*pingRes, error) {
+			return &pingRes{Message: "pong"}, nil
+		}))
+
+		for _, path := range []string{"/openapi.json", "/docs"} {
+			resp, err := svc.HTTP.Test(httptest.NewRequest(http.MethodGet, path, nil))
+			if err != nil {
+				t.Fatal(err)
+			}
+			b, _ := io.ReadAll(resp.Body)
+			_ = resp.Body.Close()
+			switch {
+			case enabled && resp.StatusCode != http.StatusOK:
+				t.Fatalf("docs enabled: GET %s = %d", path, resp.StatusCode)
+			case !enabled && resp.StatusCode != http.StatusNotFound:
+				t.Fatalf("docs disabled: GET %s = %d", path, resp.StatusCode)
+			case enabled && path == "/openapi.json" && (!strings.Contains(string(b), `"/ping"`) || !strings.Contains(string(b), `"title":"test-svc"`)):
+				t.Fatalf("spec does not describe the service: %s", b)
+			}
+		}
 	}
 }

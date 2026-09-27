@@ -7,8 +7,11 @@
 //	db, err := postgres.Connect(ctx, ...)
 //	svc.Health.Add("postgres", db)
 //	svc.OnShutdown("postgres", func(context.Context) error { db.Close(); return nil })
-//	routes.Register(svc.HTTP, handlers)
+//	routes.Register(svc.API, handlers) // documented routes; svc.HTTP for raw Fiber routes
 //	return svc.Run(ctx)
+//
+// When cfg.Docs.Enabled is true, the OpenAPI document and Swagger UI are served
+// at cfg.Docs.SpecPath (/openapi.json) and cfg.Docs.Path (/docs).
 //
 // Shutdown order: readiness flips to "draining" -> optional drain delay ->
 // HTTP server stops accepting and finishes in-flight requests -> hooks
@@ -37,6 +40,7 @@ type Service struct {
 	Config config.BaseConfig
 	Logger *zap.Logger
 	HTTP   *fiber.App
+	API    *httpserver.API // documented route registration on HTTP
 	Health *health.Registry
 
 	lc *lifecycle.Lifecycle
@@ -99,12 +103,20 @@ func New(ctx context.Context, cfg config.BaseConfig, opts ...Option) (*Service, 
 		httpserver.WithAppName(cfg.App.Name),
 		httpserver.WithMetricsPath(metricsPath),
 	}, o.httpOpts...)
+	if cfg.Docs.Enabled {
+		httpOpts = append(httpOpts, httpserver.WithSkipPaths(cfg.Docs.Path, cfg.Docs.SpecPath))
+	}
 	app := httpserver.New(cfg.HTTP, httpOpts...) //nolint:contextcheck // handlers use the per-request context
 
 	hr := health.New(o.healthTimeout)
 	hr.Register(app)
 
-	return &Service{Config: cfg, Logger: log, HTTP: app, Health: hr, lc: lc}, nil
+	api := httpserver.NewAPI(app, httpserver.APIInfo{Title: cfg.App.Name, Version: cfg.App.Version})
+	if cfg.Docs.Enabled {
+		api.ServeDocs(cfg.Docs.SpecPath, cfg.Docs.Path)
+	}
+
+	return &Service{Config: cfg, Logger: log, HTTP: app, API: api, Health: hr, lc: lc}, nil
 }
 
 // OnShutdown registers a hook that runs after the HTTP server stopped and
