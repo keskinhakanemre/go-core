@@ -129,3 +129,16 @@ func HasCode(err error, code string) bool {
 
 // IsUniqueViolation reports whether err is a unique constraint violation.
 func IsUniqueViolation(err error) bool { return HasCode(err, CodeUniqueViolation) }
+
+// ConstraintName returns the name of the constraint err violated ("" when err
+// is not a PostgreSQL constraint error). Repositories map it to domain errors:
+//
+//	errs := map[string]error{"products_sku_key": ErrSKUTaken}
+//	if mapped, ok := errs[postgres.ConstraintName(err)]; ok { return mapped }
+func ConstraintName(err error) string {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.ConstraintName
+	}
+	return ""
+}

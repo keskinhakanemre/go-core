@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -132,5 +133,52 @@ func TestWithTx(t *testing.T) {
 	}()
 	if !db.tx.rolledBack {
 		t.Fatal("expected rollback on panic")
+	}
+}
+
+func TestConstraintName(t *testing.T) {
+	err := fmt.Errorf("insert: %w", &pgconn.PgError{Code: postgres.CodeUniqueViolation, ConstraintName: "items_name_key"})
+	if got := postgres.ConstraintName(err); got != "items_name_key" {
+		t.Fatalf("ConstraintName = %q", got)
+	}
+	if got := postgres.ConstraintName(errors.New("other")); got != "" {
+		t.Fatalf("ConstraintName(other) = %q", got)
+	}
+}
+
+// TestMigrate applies migrations twice (the second run is a no-op) against a
+// real database when POSTGRES_TEST_DSN is set.
+func TestMigrate(t *testing.T) {
+	dsn := os.Getenv("POSTGRES_TEST_DSN")
+	if dsn == "" {
+		t.Skip("POSTGRES_TEST_DSN not set")
+	}
+	ctx := context.Background()
+	pool, err := postgres.Connect(ctx, postgres.Config{DSN: dsn, MaxConns: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	t.Cleanup(func() {
+		_, _ = pool.Exec(context.Background(), `DROP TABLE IF EXISTS migrate_items, goose_db_version`)
+	})
+
+	fsys := fstest.MapFS{
+		"00001_items.sql": {Data: []byte("-- +goose Up\nCREATE TABLE migrate_items (id text PRIMARY KEY);\n-- +goose Down\nDROP TABLE migrate_items;\n")},
+		"00002_name.sql":  {Data: []byte("-- +goose Up\nALTER TABLE migrate_items ADD COLUMN name text;\n-- +goose Down\nALTER TABLE migrate_items DROP COLUMN name;\n")},
+	}
+	applied, err := postgres.Migrate(ctx, pool, fsys)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(applied) != 2 || applied[0].Version != 1 || applied[1].Source != "00002_name.sql" {
+		t.Fatalf("applied = %+v", applied)
+	}
+	if _, err := pool.Exec(ctx, `INSERT INTO migrate_items (id, name) VALUES ('a', 'A')`); err != nil {
+		t.Fatal(err)
+	}
+	again, err := postgres.Migrate(ctx, pool, fsys)
+	if err != nil || len(again) != 0 {
+		t.Fatalf("second run: %+v, %v", again, err)
 	}
 }

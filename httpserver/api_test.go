@@ -13,6 +13,7 @@ import (
 
 	"github.com/keskinhakanemre/go-core/config"
 	"github.com/keskinhakanemre/go-core/httpserver"
+	"github.com/keskinhakanemre/go-core/openapi"
 )
 
 type CreateItemHandler struct{}
@@ -161,5 +162,56 @@ func TestAPISpecMatchesRequestStruct(t *testing.T) {
 	}
 	if _, ok := got["header:X-Tenant"]; !ok {
 		t.Fatalf("header param X-Tenant: %v", got)
+	}
+}
+
+func TestAPISecuritySchemes(t *testing.T) {
+	app := httpserver.New(config.HTTPConfig{})
+	api := httpserver.NewAPI(app, httpserver.APIInfo{Title: "Secure API", Version: "1.0.0"})
+	api.AddSecurityScheme("bearerAuth", openapi.BearerJWT("Access token"))
+
+	// Secure is inherited by sub groups; WithSecurity() documents a single route as public.
+	items := api.Group("/api/v1/items", "Items").Secure("bearerAuth")
+	nested := items.Group("/archive")
+	ping := httpserver.Func(func(context.Context, *struct{}) (*item, error) { return &item{}, nil })
+	httpserver.Get(items, "", ping, httpserver.WithOperationID("ListItems"))
+	httpserver.Get(nested, "", ping, httpserver.WithOperationID("ListArchived"))
+	httpserver.Get(items, "/public", ping, httpserver.WithOperationID("PublicItems"), httpserver.WithSecurity())
+	httpserver.Get(api, "/health", ping, httpserver.WithOperationID("Health"))
+	api.ServeDocs("/openapi.json", "")
+
+	_, body := do(t, app, httptest.NewRequest(http.MethodGet, "/openapi.json", nil))
+	doc, err := openapi3.NewLoader().LoadFromData([]byte(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := doc.Validate(context.Background()); err != nil {
+		t.Fatalf("invalid spec: %v\n%s", err, body)
+	}
+	scheme := doc.Components.SecuritySchemes["bearerAuth"]
+	if scheme == nil || scheme.Value.Type != "http" || scheme.Value.Scheme != "bearer" || scheme.Value.BearerFormat != "JWT" {
+		t.Fatalf("security scheme: %+v", scheme)
+	}
+	protected := func(path string) bool {
+		op := doc.Paths.Find(path).Get
+		if op.Security == nil {
+			return false
+		}
+		for _, req := range *op.Security {
+			if _, ok := req["bearerAuth"]; ok {
+				return true
+			}
+		}
+		return false
+	}
+	for path, want := range map[string]bool{
+		"/api/v1/items":         true,
+		"/api/v1/items/archive": true,
+		"/api/v1/items/public":  false,
+		"/health":               false,
+	} {
+		if got := protected(path); got != want {
+			t.Errorf("%s protected = %v, want %v", path, got, want)
+		}
 	}
 }

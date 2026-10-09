@@ -29,10 +29,11 @@ type APIInfo struct {
 //	httpserver.Get(products, "/:id", getHandler, httpserver.WithErrors(fiber.StatusNotFound))
 //	api.ServeDocs("/openapi.json", "/docs")
 type API struct {
-	router fiber.Router
-	prefix string
-	tags   []string
-	shared *apiShared
+	router   fiber.Router
+	prefix   string
+	tags     []string
+	security []string // default security schemes of the operations (Secure)
+	shared   *apiShared
 }
 
 type apiShared struct {
@@ -56,7 +57,32 @@ func (a *API) Group(prefix string, tags ...string) *API {
 	if len(tags) == 0 {
 		tags = a.tags
 	}
-	return &API{router: a.router.Group(prefix), prefix: joinPath(a.prefix, prefix), tags: tags, shared: a.shared}
+	return &API{
+		router:   a.router.Group(prefix),
+		prefix:   joinPath(a.prefix, prefix),
+		tags:     tags,
+		security: a.security,
+		shared:   a.shared,
+	}
+}
+
+// Secure returns a copy of a whose operations (and sub groups) are documented
+// as protected by any of the named security schemes. It only affects the
+// documentation: authenticate the routes with middleware (a.Router().Use).
+//
+//	api.AddSecurityScheme("bearerAuth", openapi.BearerJWT("Access token"))
+//	orders := api.Group("/api/v1/orders", "Orders").Secure("bearerAuth")
+//	orders.Router().Use(authMiddleware)
+func (a *API) Secure(schemes ...string) *API {
+	c := *a
+	c.security = schemes
+	return &c
+}
+
+// AddSecurityScheme declares a security scheme in the documentation (shown
+// as the "Authorize" button in Swagger UI).
+func (a *API) AddSecurityScheme(name string, s openapi.SecurityScheme) {
+	a.shared.spec.AddSecurityScheme(name, s)
 }
 
 // Router returns the underlying Fiber router, e.g. to add group middleware.
@@ -110,6 +136,10 @@ func Route[Req any, Res any](a *API, method, path string, h Handler[Req, Res], o
 	if len(tags) == 0 {
 		tags = a.tags
 	}
+	security := a.security
+	if o.securitySet {
+		security = o.security
+	}
 	opID := o.operationID
 	if opID == "" {
 		opID = handlerName(h)
@@ -126,6 +156,7 @@ func Route[Req any, Res any](a *API, method, path string, h Handler[Req, Res], o
 		Tags:          tags,
 		ErrorStatuses: o.errors,
 		Deprecated:    o.deprecated,
+		Security:      security,
 	})
 }
 
@@ -184,6 +215,13 @@ func WithOperationID(id string) HandleOption { return func(o *handleOptions) { o
 
 // WithDeprecated marks the route as deprecated in the documentation.
 func WithDeprecated() HandleOption { return func(o *handleOptions) { o.deprecated = true } }
+
+// WithSecurity documents the route as protected by any of the named security
+// schemes, overriding the API's default (Secure). Without arguments the route
+// is documented as public.
+func WithSecurity(schemes ...string) HandleOption {
+	return func(o *handleOptions) { o.security, o.securitySet = schemes, true }
+}
 
 // WithoutDocs registers the route without documenting it.
 func WithoutDocs() HandleOption { return func(o *handleOptions) { o.hidden = true } }

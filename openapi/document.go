@@ -53,7 +53,14 @@ type Operation struct {
 	RequestBody *RequestBody         `json:"requestBody,omitempty"`
 	Responses   map[string]*Response `json:"responses"`
 	Deprecated  bool                 `json:"deprecated,omitempty"`
+	// Security lists alternative requirements: each map names the schemes
+	// that must all be satisfied (OpenAPI security requirement objects).
+	Security []SecurityRequirement `json:"security,omitempty"`
 }
+
+// SecurityRequirement maps a security scheme name to its scopes (empty for
+// HTTP and API key schemes).
+type SecurityRequirement map[string][]string
 
 type Parameter struct {
 	Name        string  `json:"name"`
@@ -79,7 +86,25 @@ type Response struct {
 }
 
 type Components struct {
-	Schemas map[string]*Schema `json:"schemas,omitempty"`
+	Schemas         map[string]*Schema         `json:"schemas,omitempty"`
+	SecuritySchemes map[string]*SecurityScheme `json:"securitySchemes,omitempty"`
+}
+
+// SecurityScheme describes how clients authenticate (OpenAPI security
+// scheme object, HTTP and API key types).
+type SecurityScheme struct {
+	Type         string `json:"type"`             // http | apiKey
+	Scheme       string `json:"scheme,omitempty"` // http: bearer | basic
+	BearerFormat string `json:"bearerFormat,omitempty"`
+	In           string `json:"in,omitempty"`   // apiKey: header | query | cookie
+	Name         string `json:"name,omitempty"` // apiKey: header/query/cookie name
+	Description  string `json:"description,omitempty"`
+}
+
+// BearerJWT is an HTTP bearer scheme for JWT access tokens
+// ("Authorization: Bearer <token>").
+func BearerJWT(description string) SecurityScheme {
+	return SecurityScheme{Type: "http", Scheme: "bearer", BearerFormat: "JWT", Description: description}
 }
 
 // Schema is the subset of the OpenAPI 3.0 schema object used by this package.

@@ -36,7 +36,7 @@ Tasarım gerekçeleri ve kaynak projenin analizi: [`go-core-blueprint/`](go-core
 | [`openapi`](openapi) | Go tiplerinden OpenAPI 3 dokümanı üretimi (`httpserver.API` kullanır) |
 | [`health`](health) | `/livez` ve `/readyz`, paralel ve timeout'lu `Checker`'lar |
 | [`lifecycle`](lifecycle) | Sinyal yakalama + ters sırada, tek zaman bütçeli kapatma |
-| [`adapters/postgres`](adapters/postgres) | *Ayrı modül.* pgx pool + otelpgx + `WithTx` + hata yardımcıları |
+| [`adapters/postgres`](adapters/postgres) | *Ayrı modül.* pgx pool + otelpgx + `WithTx` + hata yardımcıları (`ConstraintName`) + goose `Migrate` |
 | [`adapters/couchbase`](adapters/couchbase) | *Ayrı modül.* gocb + OpenTelemetry + `Ping` |
 | [`cmd/gocore`](cmd/gocore) | Yeni servis iskeleti üreten CLI |
 
@@ -182,6 +182,16 @@ Doküman request/response struct'larından üretilir:
 | Otomatik | 400 (geçersiz istek), 422 (validation), 500 ve standart hata gövdesi; `WithErrors(404, 409)` ile ekler |
 
 Diğer seçenekler: `WithDescription`, `WithTags`, `WithOperationID`, `WithDeprecated`, `WithoutDocs`.
+
+**Kimlik doğrulama:** güvenlik şemasını bir kez tanımla, korunan grupları `Secure` ile işaretle; Swagger UI'da
+"Authorize" düğmesi çıkar ve token istekle gider. `Secure` yalnızca dokümanı etkiler; doğrulamayı middleware yapar.
+
+```go
+svc.API.AddSecurityScheme("bearerAuth", openapi.BearerJWT("POST /api/v1/auth/login yanıtındaki access token"))
+orders := svc.API.Group("/api/v1/orders", "Orders").Secure("bearerAuth") // alt gruplar da korunur
+orders.Router().Use(authMiddleware)
+httpserver.Get(orders, "/public", h, httpserver.WithSecurity()) // tek route'u açık işaretle
+```
 Fonksiyonlar için `httpserver.Func(fn)`. Doğrudan `svc.HTTP`'ye eklenen route'lar çalışır ama dokümana girmez.
 Prod'da `docs.enabled: false` tut; Swagger UI dosyaları tarayıcı tarafından jsDelivr CDN'den yüklenir.
 
@@ -246,6 +256,19 @@ svc.OnShutdown("postgres", postgres.Close(pool)) // HTTP kapandıktan sonra kapa
 
 err = postgres.WithTx(ctx, pool, func(tx pgx.Tx) error { ... })
 if postgres.IsUniqueViolation(err) { return domain.ErrProductAlreadyExists }
+
+// Hangi kısıt ihlal edildi? (aynı tabloda birden fazla unique/FK varken)
+if mapped, ok := map[string]error{"products_sku_key": ErrSKUTaken}[postgres.ConstraintName(err)]; ok { return mapped }
+```
+
+Şema migration'ları (goose, SQL dosyaları servise gömülü; replica'lar aynı anda açılsa da advisory lock ile tek sefer uygulanır):
+
+```go
+//go:embed migrations/*.sql
+var migrations embed.FS
+
+sub, _ := fs.Sub(migrations, "migrations")
+applied, err := postgres.Migrate(ctx, pool, sub) // []MigrationResult{Version, Source, Duration}
 ```
 
 Kapanış sırası: readiness `draining` → `http.drain_delay` → HTTP server (açık istekler biter) →

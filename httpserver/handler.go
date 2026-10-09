@@ -38,6 +38,8 @@ type handleOptions struct {
 	operationID string
 	deprecated  bool
 	hidden      bool
+	security    []string
+	securitySet bool // security overrides the API's default (WithSecurity)
 }
 
 func newHandleOptions(opts []HandleOption) handleOptions {

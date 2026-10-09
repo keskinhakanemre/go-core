@@ -16,6 +16,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -60,7 +61,10 @@ func FiberMiddleware(skip func(*fiber.Ctx) bool) fiber.Handler {
 			// The app ErrorHandler has not run yet, so derive the status from the error.
 			status = StatusFromError(err)
 		}
-		requestDuration.WithLabelValues(routeLabel(c, status), c.Method(), strconv.Itoa(status)).
+		// Fiber's c.Method() and route strings may point into buffers reused by
+		// later requests (unless Immutable is set); the label values outlive the
+		// request, so they are copied.
+		requestDuration.WithLabelValues(strings.Clone(routeLabel(c, status)), strings.Clone(c.Method()), strconv.Itoa(status)).
 			Observe(time.Since(start).Seconds())
 		return err
 	}

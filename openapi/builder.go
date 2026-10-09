@@ -23,6 +23,7 @@ type OperationSpec struct {
 	Tags          []string
 	ErrorStatuses []int // documented error statuses in addition to the automatic ones
 	Deprecated    bool
+	Security      []string // names of the security schemes (see AddSecurityScheme) that protect the operation; any one is enough
 }
 
 // Builder accumulates operations into a Document. It is safe for concurrent use.
@@ -32,6 +33,7 @@ type Builder struct {
 	gen       *Generator
 	errSchema *Schema
 	opIDs     map[string]string // operationId -> method+path owning it
+	security  map[string]*SecurityScheme
 }
 
 // NewBuilder creates a builder. errorType, if not nil, is the body type of
@@ -46,6 +48,17 @@ func NewBuilder(info Info, errorType reflect.Type) *Builder {
 		b.errSchema = b.gen.Schema(errorType)
 	}
 	return b
+}
+
+// AddSecurityScheme declares a security scheme under name; operations refer
+// to it through OperationSpec.Security. Declaring a name again replaces it.
+func (b *Builder) AddSecurityScheme(name string, s SecurityScheme) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.security == nil {
+		b.security = map[string]*SecurityScheme{}
+	}
+	b.security[name] = &s
 }
 
 // Add registers an operation. Registering the same method and path again replaces it.
@@ -63,6 +76,9 @@ func (b *Builder) Add(spec OperationSpec) {
 		Tags:        spec.Tags,
 		Deprecated:  spec.Deprecated,
 		Responses:   map[string]*Response{},
+	}
+	for _, name := range spec.Security {
+		op.Security = append(op.Security, SecurityRequirement{name: {}})
 	}
 	op.OperationID = b.uniqueID(spec.OperationID, method, path, key)
 	if op.Summary == "" {
@@ -224,8 +240,15 @@ func (b *Builder) MarshalJSON() ([]byte, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	doc := b.doc
-	if comps := b.gen.Components(); len(comps) > 0 {
-		doc.Components = &Components{Schemas: comps}
+	comps := b.gen.Components()
+	if len(comps) > 0 || len(b.security) > 0 {
+		doc.Components = &Components{}
+		if len(comps) > 0 {
+			doc.Components.Schemas = comps
+		}
+		if len(b.security) > 0 {
+			doc.Components.SecuritySchemes = b.security
+		}
 	}
 	return json.Marshal(doc)
 }

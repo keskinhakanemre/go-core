@@ -4,6 +4,24 @@ Bu proje [Semantic Versioning](https://semver.org/) kullanır. `v1.0.0` öncesin
 
 ## [Unreleased]
 
+## [v0.3.0] - 2026-10-09 · adapters/postgres [v0.2.0]
+
+### Eklendi
+- `openapi`: güvenlik şemaları — `SecurityScheme`, `BearerJWT`, `Builder.AddSecurityScheme`, `OperationSpec.Security`;
+  doküman `components.securitySchemes` ve operasyon `security` alanlarını içerir (Swagger UI "Authorize").
+- `httpserver.API`: `AddSecurityScheme`, `Secure(schemes...)` (grup ve alt gruplar için varsayılan güvenlik) ve
+  route seçeneği `WithSecurity(schemes...)` (`WithSecurity()` route'u açık işaretler).
+- `adapters/postgres`: `ConstraintName(err)` (ihlal edilen kısıtın adı) ve goose ile `Migrate(ctx, pool, fsys)`
+  (advisory lock'lu, `[]MigrationResult` döner). Adapter modülü artık `github.com/pressly/goose/v3`'e bağlı.
+
+### Düzeltildi
+- `metrics.FiberMiddleware`: `method` ve `route` etiketleri kopyalanarak saklanır. Önceden Fiber'ın (Immutable kapalıyken)
+  yeniden kullandığı tampona işaret ediyordu; sonraki istekler etiketleri bozuyor ve `/metrics` "duplicate series"
+  hatası veriyordu. Servislerdeki `Immutable: true` geçici çözümüne artık gerek yok.
+
+### Değişmedi
+- Mevcut API'ler aynen çalışır (breaking change yok); güvenlik tanımlanmazsa doküman önceki gibidir.
+
 ## [v0.2.0] - 2026-09-27
 
 ### Eklendi
