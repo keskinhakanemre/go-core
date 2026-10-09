@@ -4,6 +4,12 @@ Bu proje [Semantic Versioning](https://semver.org/) kullanır. `v1.0.0` öncesin
 
 ## [Unreleased]
 
+## [v0.3.1] - 2026-10-09
+
+### Güvenlik
+- `golang.org/x/net` v0.60.0'a ve Go toolchain'i go1.26.9'a yükseltildi (GO-2026-6617: HTTP/2 HPACK encoder yarışı
+  sunucuyu çökertebiliyordu). Servisler de kendi `toolchain` satırını go1.26.9'a çekmeli.
+
 ## [v0.3.0] - 2026-10-09 · adapters/postgres [v0.2.0]
 
 ### Eklendi
